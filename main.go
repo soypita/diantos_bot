@@ -2,12 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"log"
-	"strings"
-
 	"gopkg.in/telegram-bot-api.v4"
+	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 type DataAddRequest struct {
@@ -62,12 +61,23 @@ func main() {
 	}
 	for update := range updates {
 		log.Println(update.Message.Text)
-		resp := dataProv.getMatchPhrase(update.Message.Text)
-		if resp != "" {
-			bot.Send(tgbotapi.NewMessage(
-				update.Message.Chat.ID,
-				"Как говорится " + strings.ToLower(resp),
-			))
+
+		if update.Message.IsCommand() {
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+			switch update.Message.Command() {
+			case "добавить":
+				dataProv.insertNewPhrases([]string{update.Message.CommandArguments()})
+			}
+			msg.Text = "Готово!"
+			bot.Send(msg)
+		} else {
+			resp := dataProv.getMatchPhrase(update.Message.Text)
+			if resp != "" {
+				bot.Send(tgbotapi.NewMessage(
+					update.Message.Chat.ID,
+					"Как говорится "+strings.ToLower(resp),
+				))
+			}
 		}
 	}
 }
