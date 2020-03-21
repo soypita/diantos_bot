@@ -32,6 +32,9 @@ func main() {
 	token := os.Getenv("TELEGRAM_TOKEN")
 	webHookUrl := os.Getenv("WEBHOOK_URL")
 	port := os.Getenv("PORT")
+	log.Println(token)
+	log.Println(webHookUrl)
+	log.Println(port)
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		panic(err)
