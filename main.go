@@ -62,10 +62,12 @@ func main() {
 	for update := range updates {
 		log.Println(update.Message.Text)
 		resp := dataProv.getMatchPhrase(update.Message.Text)
-		bot.Send(tgbotapi.NewMessage(
-			update.Message.Chat.ID,
-			resp,
-		))
+		if resp != "" {
+			bot.Send(tgbotapi.NewMessage(
+				update.Message.Chat.ID,
+				resp,
+			))
+		}
 	}
 }
 

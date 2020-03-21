@@ -27,5 +27,5 @@ func (d dataProvider) getMatchPhrase(phrase string) string {
 			return val
 		}
 	}
-	return "Диантосу нечего сказать на это"
+	return ""
 }
