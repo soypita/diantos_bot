@@ -69,12 +69,11 @@ func main() {
 				dataProv.isAdd = true
 				msg.Text = "Новая мудрость от продакта: "
 			}
-			msg.Text = "Готово!"
 			bot.Send(msg)
 		} else {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 			if dataProv.isAdd {
-				dataProv.insertNewPhrases([]string{update.Message.CommandArguments()})
+				dataProv.insertNewPhrases([]string{update.Message.Text})
 				dataProv.isAdd = false
 				msg.Text = "Готово!"
 				bot.Send(msg)
