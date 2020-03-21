@@ -66,17 +66,26 @@ func main() {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 			switch update.Message.Command() {
 			case "diantosadd":
-				dataProv.insertNewPhrases([]string{update.Message.CommandArguments()})
+				dataProv.isAdd = true
+				msg.Text = "Новая мудрость от продакта: "
 			}
 			msg.Text = "Готово!"
 			bot.Send(msg)
 		} else {
-			resp := dataProv.getMatchPhrase(update.Message.Text)
-			if resp != "" {
-				bot.Send(tgbotapi.NewMessage(
-					update.Message.Chat.ID,
-					"Как говорится "+strings.ToLower(resp),
-				))
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
+			if dataProv.isAdd {
+				dataProv.insertNewPhrases([]string{update.Message.CommandArguments()})
+				dataProv.isAdd = false
+				msg.Text = "Готово!"
+				bot.Send(msg)
+			} else {
+				resp := dataProv.getMatchPhrase(update.Message.Text)
+				if resp != "" {
+					bot.Send(tgbotapi.NewMessage(
+						update.Message.Chat.ID,
+						"Как говорится "+strings.ToLower(resp),
+					))
+				}
 			}
 		}
 	}

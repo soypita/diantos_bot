@@ -9,6 +9,7 @@ import (
 )
 
 type dataProvider struct {
+	isAdd             bool
 	phraseData        []string
 	patternForSymbols *regexp.Regexp
 	patternToSpace    *regexp.Regexp
