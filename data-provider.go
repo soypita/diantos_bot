@@ -23,6 +23,8 @@ func NewDataProvider() *dataProvider {
 	dataProvider.phraseData = make([]string, 0, 10)
 	rand.Seed(time.Now().Unix())
 	dataProvider.patternForSymbols = regexp.MustCompile(specialSymbols)
+	dataProvider.patternToSpace = regexp.MustCompile(whiteSpaceSymbol)
+
 	return dataProvider
 }
 
