@@ -23,7 +23,7 @@ func (d *dataProvider) insertNewPhrases(phraseList []string) {
 
 func (d dataProvider) getMatchPhrase(phrase string) string {
 	for _, val := range d.phraseData {
-		if strings.Contains(val, phrase) {
+		if strings.Contains(strings.ToLower(val), strings.ToLower(phrase)) {
 			return val
 		}
 	}
