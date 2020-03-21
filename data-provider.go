@@ -3,6 +3,7 @@ package main
 import (
 	"math/rand"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 )
@@ -37,12 +38,27 @@ func (d dataProvider) getMatchPhrase(phrase string) string {
 	preparedInString := d.patternToSpace.ReplaceAllString(phraseWithoutSymbols, whiteSpaceString)
 	splitInString := strings.Split(preparedInString, whiteSpaceString)
 
-	for _, val := range d.phraseData {
+	distribution := map[int]int{}
+	for i, val := range d.phraseData {
 		for _, in := range splitInString {
 			if strings.Contains(strings.ToLower(val), strings.ToLower(in)) {
-				return val
+				distribution[i]++
 			}
 		}
 	}
+
+	keys := make([]int, 0, len(distribution))
+	for key := range distribution {
+		keys = append(keys, key)
+	}
+
+	sort.Slice(keys, func(i, j int) bool {
+		return distribution[keys[i]] > distribution[keys[j]]
+	})
+
+	if len(keys) != 0 {
+		return d.phraseData[keys[0]]
+	}
+
 	return ""
 }
