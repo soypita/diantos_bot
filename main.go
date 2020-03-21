@@ -65,7 +65,7 @@ func main() {
 		if resp != "" {
 			bot.Send(tgbotapi.NewMessage(
 				update.Message.Chat.ID,
-				resp,
+				"Как говорится " + resp,
 			))
 		}
 	}
