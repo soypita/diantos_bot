@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 
 	"github.com/julienschmidt/httprouter"
 	"gopkg.in/telegram-bot-api.v4"
@@ -46,9 +47,10 @@ func main() {
 
 	updates := bot.ListenForWebhook("/")
 
-	go http.ListenAndServe(":"+port, router)
+	go log.Fatal(http.ListenAndServe(":"+port, router))
 
 	for update := range updates {
+		log.Println(update.Message.Text)
 		resp := dataProv.getMatchPhrase(update.Message.Text)
 		bot.Send(tgbotapi.NewMessage(
 			update.Message.Chat.ID,
