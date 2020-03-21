@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/julienschmidt/httprouter"
 	"gopkg.in/telegram-bot-api.v4"
 	"net/http"
 	"os"
@@ -16,7 +15,7 @@ type DataAddRequest struct {
 
 var dataProv *dataProvider
 
-func addNewData(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func addNewData(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	dataList := DataAddRequest{}
 	if err := json.NewDecoder(r.Body).Decode(&dataList); err != nil {
@@ -42,18 +41,24 @@ func main() {
 	bot.Debug = true
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
-	_, err = bot.SetWebhook(tgbotapi.NewWebhook(webHookUrl))
+	_, err = bot.SetWebhook(tgbotapi.NewWebhook(webHookUrl + "/" + bot.Token))
 	if err != nil {
 		panic(err)
 	}
 
-	router := httprouter.New()
-	router.PUT("/addPhrase", addNewData)
+	http.HandleFunc("/addPhrase", addNewData)
 
-	updates := bot.ListenForWebhook("/")
+	updates := bot.ListenForWebhook("/" + bot.Token)
 
-	go log.Fatal(http.ListenAndServe(":"+port, router))
+	go http.ListenAndServe(":"+port, nil)
 
+	info, err := bot.GetWebhookInfo()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if info.LastErrorDate != 0 {
+		log.Printf("Telegram callback failed: %s", info.LastErrorMessage)
+	}
 	for update := range updates {
 		log.Println(update.Message.Text)
 		resp := dataProv.getMatchPhrase(update.Message.Text)
