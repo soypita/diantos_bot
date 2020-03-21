@@ -39,6 +39,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	bot.Debug = true
+	log.Printf("Authorized on account %s", bot.Self.UserName)
 
 	_, err = bot.SetWebhook(tgbotapi.NewWebhook(webHookUrl))
 	if err != nil {
@@ -48,7 +50,7 @@ func main() {
 	router := httprouter.New()
 	router.PUT("/addPhrase", addNewData)
 
-	updates := bot.ListenForWebhook("/")
+	updates := bot.ListenForWebhook("/" + bot.Token)
 
 	go log.Fatal(http.ListenAndServe(":"+port, router))
 
