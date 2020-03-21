@@ -42,7 +42,7 @@ func main() {
 	bot.Debug = true
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
-	_, err = bot.SetWebhook(tgbotapi.NewWebhook(webHookUrl))
+	_, err = bot.SetWebhook(tgbotapi.NewWebhook(webHookUrl + "/" + bot.Token))
 	if err != nil {
 		panic(err)
 	}
