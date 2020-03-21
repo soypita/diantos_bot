@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"strings"
 
 	"gopkg.in/telegram-bot-api.v4"
 	"net/http"
@@ -65,7 +66,7 @@ func main() {
 		if resp != "" {
 			bot.Send(tgbotapi.NewMessage(
 				update.Message.Chat.ID,
-				"Как говорится " + resp,
+				"Как говорится " + strings.ToLower(resp),
 			))
 		}
 	}
