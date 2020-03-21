@@ -65,7 +65,7 @@ func main() {
 		if update.Message.IsCommand() {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 			switch update.Message.Command() {
-			case "добавить":
+			case "diantosadd":
 				dataProv.insertNewPhrases([]string{update.Message.CommandArguments()})
 			}
 			msg.Text = "Готово!"
