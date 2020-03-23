@@ -33,11 +33,10 @@ func addNewData(w http.ResponseWriter, r *http.Request) {
 func getAllData(w http.ResponseWriter, r *http.Request) {
 	dataList, err := dataProv.getAllData()
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Data access error")
+		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 	respondWithJson(w, http.StatusOK, dataList)
-
 }
 
 func main() {

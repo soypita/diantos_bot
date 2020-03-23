@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gomodule/redigo/redis"
+	"log"
 	"math/rand"
 	"regexp"
 	"sort"
@@ -38,8 +39,10 @@ func (d *dataProvider) insertNewPhrases(phraseList []string) error {
 func (d dataProvider) getAllData() ([]string, error) {
 	phraseData, err := d.phraseDao.GetPhraseList()
 	if err == redis.ErrNil {
+		log.Println(err)
 		return make([]string, 0), nil
 	} else if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 	return phraseData, nil
@@ -53,6 +56,7 @@ func (d dataProvider) getMatchPhrase(phrase string) (string, error) {
 	phraseData, err := d.phraseDao.GetPhraseList()
 
 	if err != nil {
+		log.Println(err)
 		return "", err
 	}
 
