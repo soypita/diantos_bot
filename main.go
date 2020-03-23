@@ -36,6 +36,7 @@ func getAllData(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+	log.Println("Size of get data list: ", len(dataList))
 	respondWithJson(w, http.StatusOK, dataList)
 }
 
