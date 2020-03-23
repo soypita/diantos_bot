@@ -48,11 +48,14 @@ func (d *phraseDao) DeleteAllPhrases() error {
 func (d *phraseDao) AddNewPhrases(phraseList []string) error {
 	connection := d.connectionPool.Get()
 	defer connection.Close()
+	var values []interface{}
 	for _, val := range phraseList {
-		_, err := connection.Do("SADD", d.phraseListKey, val)
-		if err != nil {
-			return err
-		}
+		values = append(values, val)
 	}
+	_, err := connection.Do("SADD", d.phraseListKey, values)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
