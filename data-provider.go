@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gomodule/redigo/redis"
 	"math/rand"
 	"regexp"
 	"sort"
@@ -10,9 +11,9 @@ import (
 
 type dataProvider struct {
 	isAdd             bool
-	phraseData        []string
 	patternForSymbols *regexp.Regexp
 	patternToSpace    *regexp.Regexp
+	phraseDao         *phraseDao
 }
 
 const specialSymbols = `[0-9$&+,:;=?@#|'<>.^*()%!-]`
@@ -20,27 +21,43 @@ const emptyString = ""
 const whiteSpaceSymbol = `\s+`
 const whiteSpaceString = " "
 
-func NewDataProvider() *dataProvider {
+func NewDataProvider(dataStoreUrl string) *dataProvider {
 	dataProvider := new(dataProvider)
-	dataProvider.phraseData = make([]string, 0, 10)
 	rand.Seed(time.Now().Unix())
 	dataProvider.patternForSymbols = regexp.MustCompile(specialSymbols)
 	dataProvider.patternToSpace = regexp.MustCompile(whiteSpaceSymbol)
-
+	dataProvider.phraseDao = NewPhraseDao(dataStoreUrl)
 	return dataProvider
 }
 
-func (d *dataProvider) insertNewPhrases(phraseList []string) {
-	d.phraseData = append(d.phraseData, phraseList...)
+func (d *dataProvider) insertNewPhrases(phraseList []string) error {
+	err := d.phraseDao.AddNewPhrases(phraseList)
+	return err
 }
 
-func (d dataProvider) getMatchPhrase(phrase string) string {
+func (d dataProvider) getAllData() ([]string, error) {
+	phraseData, err := d.phraseDao.GetPhraseList()
+	if err == redis.ErrNil {
+		return make([]string, 0), nil
+	} else if err != nil {
+		return nil, err
+	}
+	return phraseData, nil
+}
+
+func (d dataProvider) getMatchPhrase(phrase string) (string, error) {
 	phraseWithoutSymbols := strings.Trim(d.patternForSymbols.ReplaceAllString(phrase, emptyString), whiteSpaceString)
 	preparedInString := d.patternToSpace.ReplaceAllString(phraseWithoutSymbols, whiteSpaceString)
 	splitInString := strings.Split(preparedInString, whiteSpaceString)
 
+	phraseData, err := d.phraseDao.GetPhraseList()
+
+	if err != nil {
+		return "", err
+	}
+
 	distribution := map[int]int{}
-	for i, val := range d.phraseData {
+	for i, val := range phraseData {
 		for _, in := range splitInString {
 			if strings.Contains(strings.ToLower(val), strings.ToLower(in)) {
 				distribution[i]++
@@ -58,8 +75,8 @@ func (d dataProvider) getMatchPhrase(phrase string) string {
 	})
 
 	if len(keys) != 0 {
-		return d.phraseData[keys[0]]
+		return phraseData[keys[0]], nil
 	}
 
-	return ""
+	return "", nil
 }

@@ -22,15 +22,31 @@ func addNewData(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusBadRequest, "Invalid Request")
 		return
 	}
-	dataProv.insertNewPhrases(dataList.DataList)
+	err := dataProv.insertNewPhrases(dataList.DataList)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Data access error")
+		return
+	}
 	respondWithJson(w, http.StatusOK, `{"status": "success"}`)
 }
 
+func getAllData(w http.ResponseWriter, r *http.Request) {
+	dataList, err := dataProv.getAllData()
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Data access error")
+		return
+	}
+	respondWithJson(w, http.StatusOK, dataList)
+
+}
+
 func main() {
-	dataProv = NewDataProvider()
 	token := os.Getenv("TELEGRAM_TOKEN")
 	webHookUrl := os.Getenv("WEBHOOK_URL")
 	port := os.Getenv("PORT")
+	redisURL := os.Getenv("REDIS_URL")
+	dataProv = NewDataProvider(redisURL)
+
 	log.Println(token)
 	log.Println(webHookUrl)
 	log.Println(port)
@@ -47,6 +63,7 @@ func main() {
 	}
 
 	http.HandleFunc("/addPhrase", addNewData)
+	http.HandleFunc("/getAllPhrases", getAllData)
 
 	updates := bot.ListenForWebhook("/" + bot.Token)
 
@@ -73,13 +90,20 @@ func main() {
 		} else {
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 			if dataProv.isAdd {
-				dataProv.insertNewPhrases([]string{update.Message.Text})
+				err := dataProv.insertNewPhrases([]string{update.Message.Text})
+				if err != nil {
+					msg.Text = "Хмм, что-то пошло не так..."
+				} else {
+					msg.Text = "Готово!"
+				}
 				dataProv.isAdd = false
-				msg.Text = "Готово!"
 				bot.Send(msg)
 			} else {
-				resp := dataProv.getMatchPhrase(update.Message.Text)
-				if resp != "" {
+				resp, err := dataProv.getMatchPhrase(update.Message.Text)
+				if err != nil {
+					log.Println("Error when get phrases: ", err)
+				}
+				if resp != "" && err == nil {
 					bot.Send(tgbotapi.NewMessage(
 						update.Message.Chat.ID,
 						"Как говорится "+strings.ToLower(resp),
