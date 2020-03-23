@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/gomodule/redigo/redis"
-	"log"
 )
 
 const phraseListKey = "phrases"
@@ -33,7 +32,6 @@ func (d phraseDao) GetPhraseList() ([]string, error) {
 	connection := d.connectionPool.Get()
 	defer connection.Close()
 	phraseData, err := redis.Strings(connection.Do("SMEMBERS", d.phraseListKey))
-	log.Println("Length of set slice: ", len(phraseData))
 	if err != nil {
 		return nil, err
 	}
@@ -47,21 +45,11 @@ func (d *phraseDao) DeleteAllPhrases() error {
 	return err
 }
 
-func (d *phraseDao) AddNewPhrases(phrase []string) error {
+func (d *phraseDao) AddNewPhrases(phraseList []string) error {
 	connection := d.connectionPool.Get()
 	defer connection.Close()
-	phraseData, err := redis.Strings(connection.Do("SMEMBERS", d.phraseListKey))
-	if err == redis.ErrNil {
-		newPhraseList := append(make([]string, 0, 10), phrase...)
-		_, err := connection.Do("SADD", d.phraseListKey, newPhraseList)
-		if err != nil {
-			return err
-		}
-	} else if err != nil {
-		return err
-	} else {
-		phraseData = append(phraseData, phrase...)
-		_, err := connection.Do("SADD", d.phraseListKey, phraseData)
+	for _, val := range phraseList {
+		_, err := connection.Do("SADD", d.phraseListKey, val)
 		if err != nil {
 			return err
 		}
