@@ -29,7 +29,7 @@ func NewPhraseDao(url string) *phraseDao {
 func (d phraseDao) GetPhraseList() ([]string, error) {
 	connection := d.connectionPool.Get()
 	defer connection.Close()
-	phraseData, err := redis.Strings(connection.Do("GET", d.phraseListKey))
+	phraseData, err := redis.Strings(connection.Do("SMEMBERS", d.phraseListKey))
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (d *phraseDao) DeleteAllPhrases() error {
 func (d *phraseDao) AddNewPhrases(phrase []string) error {
 	connection := d.connectionPool.Get()
 	defer connection.Close()
-	phraseData, err := redis.Strings(connection.Do("GET", d.phraseListKey))
+	phraseData, err := redis.Strings(connection.Do("SMEMBERS", d.phraseListKey))
 	if err == redis.ErrNil {
 		newPhraseList := append(make([]string, 0, 10), phrase...)
 		_, err := connection.Do("SADD", d.phraseListKey, newPhraseList)
