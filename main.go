@@ -39,6 +39,15 @@ func getAllData(w http.ResponseWriter, r *http.Request) {
 	respondWithJson(w, http.StatusOK, dataList)
 }
 
+func deleteData(w http.ResponseWriter, r *http.Request) {
+	err := dataProv.deleteAllPhrases()
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	respondWithJson(w, http.StatusOK, `{"status":"success"}`)
+}
+
 func main() {
 	token := os.Getenv("TELEGRAM_TOKEN")
 	webHookUrl := os.Getenv("WEBHOOK_URL")
@@ -63,6 +72,7 @@ func main() {
 
 	http.HandleFunc("/addPhrase", addNewData)
 	http.HandleFunc("/getAllPhrases", getAllData)
+	http.HandleFunc("/deleteAllPhrases", deleteData)
 
 	updates := bot.ListenForWebhook("/" + bot.Token)
 

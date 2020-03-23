@@ -31,6 +31,10 @@ func NewDataProvider(dataStoreUrl string) *dataProvider {
 	return dataProvider
 }
 
+func (d *dataProvider) deleteAllPhrases() error {
+	return d.phraseDao.DeleteAllPhrases()
+}
+
 func (d *dataProvider) insertNewPhrases(phraseList []string) error {
 	err := d.phraseDao.AddNewPhrases(phraseList)
 	return err
