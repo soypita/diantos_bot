@@ -1,6 +1,9 @@
 package main
 
-import "github.com/gomodule/redigo/redis"
+import (
+	"github.com/gomodule/redigo/redis"
+	"log"
+)
 
 const phraseListKey = "phrases"
 
@@ -30,6 +33,7 @@ func (d phraseDao) GetPhraseList() ([]string, error) {
 	connection := d.connectionPool.Get()
 	defer connection.Close()
 	phraseData, err := redis.Strings(connection.Do("SMEMBERS", d.phraseListKey))
+	log.Println("Length of set slice: ", len(phraseData))
 	if err != nil {
 		return nil, err
 	}
