@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 type GeneratorRequest struct {
@@ -60,5 +61,5 @@ func (p *phraseGeneratorClient) getNewPhrase(initString string) (string, error) 
 	if phraseList.Replies == nil || len(phraseList.Replies) == 0 {
 		return "", nil
 	}
-	return initString + phraseList.Replies[0], nil
+	return strings.TrimSpace(phraseList.Replies[0]), nil
 }
