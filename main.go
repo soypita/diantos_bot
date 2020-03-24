@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -55,6 +56,7 @@ func main() {
 	port := os.Getenv("PORT")
 	redisURL := os.Getenv("REDIS_URL")
 	generatorUrl := os.Getenv("GEN_URL")
+	sizeThreshold, _ := strconv.Atoi(os.Getenv("THRESHOLD"))
 	dataProv = NewDataProvider(redisURL)
 	phraseClient := NewPhraseGeneratorClient(generatorUrl)
 
@@ -111,7 +113,7 @@ func main() {
 				dataProv.isAdd = false
 				bot.Send(msg)
 			} else {
-				if len(update.Message.Text) > 10 {
+				if len(update.Message.Text) >= sizeThreshold {
 					resp, err := phraseClient.getNewPhrase(update.Message.Text)
 					if err != nil {
 						log.Println("Error when get phrases: ", err)
