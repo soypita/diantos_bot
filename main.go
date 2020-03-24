@@ -54,7 +54,9 @@ func main() {
 	webHookUrl := os.Getenv("WEBHOOK_URL")
 	port := os.Getenv("PORT")
 	redisURL := os.Getenv("REDIS_URL")
+	generatorUrl := os.Getenv("GEN_URL")
 	dataProv = NewDataProvider(redisURL)
+	phraseClient := NewPhraseGeneratorClient(generatorUrl)
 
 	log.Println(token)
 	log.Println(webHookUrl)
@@ -109,15 +111,17 @@ func main() {
 				dataProv.isAdd = false
 				bot.Send(msg)
 			} else {
-				resp, err := dataProv.getMatchPhrase(update.Message.Text)
-				if err != nil {
-					log.Println("Error when get phrases: ", err)
-				}
-				if resp != "" && err == nil {
-					bot.Send(tgbotapi.NewMessage(
-						update.Message.Chat.ID,
-						"Как говорится "+strings.ToLower(resp),
-					))
+				if len(update.Message.Text) > 10 {
+					resp, err := phraseClient.getNewPhrase(update.Message.Text)
+					if err != nil {
+						log.Println("Error when get phrases: ", err)
+					}
+					if resp != "" && err == nil {
+						bot.Send(tgbotapi.NewMessage(
+							update.Message.Chat.ID,
+							strings.ToLower(resp),
+						))
+					}
 				}
 			}
 		}
